@@ -15,7 +15,7 @@ var config = {
     arcade: {
       // parametres du mode arcade
       gravity: {
-        y: 300 // gravité verticale : acceleration ddes corps en pixels par seconde
+        y: 800 // gravité verticale : acceleration ddes corps en pixels par seconde
       },
       debug: false // permet de voir les hitbox et les vecteurs d'acceleration quand mis à true
     }
@@ -49,6 +49,10 @@ function preload() {
     frameWidth: 80,
     frameHeight: 80,
   });
+    this.load.spritesheet('img_porte', 'src/assets/animDoor.png', {
+    frameWidth: 55,
+    frameHeight: 75,
+  });
 }
 
 /***********************************************************************/
@@ -63,23 +67,31 @@ function preload() {
  */
 function create() {
   // 1. Fond en premier pour qu'il reste à l'arrière-plan
-  this.add.image(960, 540, "img_ciel");
+  const ciel = this.add.image(960, 540, "img_ciel");
+    ciel.setScrollFactor(0);
 
   // 2. Tilemap
   const map = this.make.tilemap({ key: 'map' });
 
   // Remplace 'spritebgresource' par le nom réel de ton jeu de tuiles dans Tiled
   const tileset = map.addTilesetImage('spritebgresource', 'tiles');
+  const spawnPoint = map.findObject('objets', obj => obj.name === 'spawn_player');
+
+  const startX = spawnPoint ? spawnPoint.x : 100;
+  const startY = spawnPoint ? spawnPoint.y : 1300;
 
   // 'plateformes' tout en minuscules comme dans le JSON
   const platformsLayer = map.createLayer('plateformes', tileset, 0, 0);
+  const decorLayer = map.createLayer('décor', tileset, 0, 0);
+
+  const objetsLayer = map.getObjectLayer('objets');
   
   // Active les tuiles solides (adapte selon ta propriété Tiled)
   platformsLayer.setCollisionByProperty({ collide: true });
 
   // 3. Joueur
-  player = this.physics.add.sprite(100, 450, 'img_perso'); 
-  player.setCollideWorldBounds(true); 
+  player = this.physics.add.sprite(startX, startY, 'img_perso');
+  player.setCollideWorldBounds(true);
   player.setBounce(0.2); 
 
   // 4. Collider joueur / plateformes
@@ -116,7 +128,15 @@ function create() {
     frames: [{ key: "img_perso", frame: 2 }],
     frameRate: 20
   }); 
+
+  this.anims.create({
+    key: 'anim_porte',
+    frames: this.anims.generateFrameNumbers('img_porte', { start: 0, end: 10 }),
+      frameRate: 50,
+      repeat: 1,
+  });
 }
+
 
 /***********************************************************************/
 /** FONCTION UPDATE 
@@ -124,18 +144,21 @@ function create() {
 
 function update() {
   if (clavier.right.isDown) {
-    player.setVelocityX(160);
+    player.setVelocityX(250);
     player.anims.play('anim_tourne_droite', true); 
   } 
   else if (clavier.left.isDown) {
-    player.setVelocityX(-160);
+    player.setVelocityX(-250);
     player.anims.play('anim_tourne_gauche', true); 
   } else {
     player.setVelocityX(0);
     player.anims.play('anim_face'); 
   } 
-  if ((clavier.up.isDown || clavier.space.isDown) /* & player.body.touching.down*/) {
-      player.setVelocityY(-330);
+  if ((clavier.up.isDown || clavier.space.isDown) && player.body.blocked.down) {
+    player.setVelocityY(-450);
+  }
+  if ((clavier.down.isDown)) {
+    action = true;
   }
 }
 
