@@ -17,7 +17,7 @@ var config = {
       gravity: {
         y: 800 // gravité verticale : acceleration ddes corps en pixels par seconde
       },
-      debug: false // permet de voir les hitbox et les vecteurs d'acceleration quand mis à true
+      debug: true // permet de voir les hitbox et les vecteurs d'acceleration quand mis à true
     }
   },
   scene: {
@@ -33,6 +33,10 @@ new Phaser.Game(config);
 var player;
 var clavier;
 
+// Variables pour les couches de parallaxe
+var ciel;
+var fond1;
+
 /***********************************************************************/
 /** FONCTION PRELOAD 
 /***********************************************************************/
@@ -44,6 +48,9 @@ var clavier;
 function preload() {
     this.load.image('tiles', "src/assets/tileset.png");
     this.load.image("img_ciel", "src/assets/sky.png"); 
+    this.load.image("img_fond1", "src/assets/fond_layer1.png");
+    this.load.image("img_fond2", "src/assets/fond_layer2.png");
+    this.load.image("img_soleil", "src/assets/Sun.png");
     this.load.tilemapTiledJSON('map', 'src/mapresource.json');
     this.load.spritesheet("img_perso", "src/assets/hero2.png", {
     frameWidth: 80,
@@ -66,9 +73,21 @@ function preload() {
  * ainsi que toutes les instructions permettant de planifier des evenements
  */
 function create() {
-  // 1. Fond en premier pour qu'il reste à l'arrière-plan
-  const ciel = this.add.image(960, 540, "img_ciel");
-    ciel.setScrollFactor(0);
+  // 1. Fonds en TileSprite (ancrés à l'écran via setScrollFactor(0))
+  sun = this.add.tileSprite(0, 0, 200, 200, "img_soleil")
+  ciel = this.add.tileSprite(0, 0, 1920, 1080, "img_ciel")
+    .setOrigin(0, 0)
+    .setScrollFactor(0);
+
+  const hauteurFond1 = this.textures.get('img_fond1').getSourceImage().height;
+  const hauteurFond2 = this.textures.get('img_fond2').getSourceImage().height;
+
+  fond2 = this.add.tileSprite(0, 800, 1920, hauteurFond2, "img_fond2")
+    .setOrigin(0, 1)
+    .setScrollFactor(0);
+  fond1 = this.add.tileSprite(0, 1080, 1920, hauteurFond1, "img_fond1")
+    .setOrigin(0, 1)
+    .setScrollFactor(0);
 
   // 2. Tilemap
   const map = this.make.tilemap({ key: 'map' });
@@ -91,8 +110,11 @@ function create() {
 
   // 3. Joueur
   player = this.physics.add.sprite(startX, startY, 'img_perso');
+  player.body.setSize(45, 70);
+  player.body.setOffset(20, 10);
   player.setCollideWorldBounds(true);
   player.setBounce(0.2); 
+  player.body.onWorldBounds = true; 
 
   // 4. Collider joueur / plateformes
   this.physics.add.collider(player, platformsLayer);
@@ -103,11 +125,25 @@ function create() {
   // Définir les limites de la caméra selon la taille réelle de la carte (2400x1600)
   this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-// Définir les limites du monde physique pour que le joueur ne soit pas bloqué à Y=1080
+  // Définir les limites du monde physique pour que le joueur ne soit pas bloqué à Y=1080
   this.physics.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
-// Suivre le joueur
+  // Suivre le joueur
   this.cameras.main.startFollow(player);
+
+  player.body.world.on(
+    "worldbounds", // evenement surveillé
+    function (body, up, down, left, right) {
+      // on verifie si la hitbox qui est rentrée en collision est celle du player,
+      // et si la collision a eu lieu sur le bord inférieur du player
+      if (body.gameObject === player && down == true) {
+        // si oui : GAME OVER on arrete la physique et on colorie le personnage en rouge
+        this.physics.pause();
+        player.setTint(0xff0000);
+      }
+    },
+    this
+  ); 
 
   this.anims.create({
     key: "anim_tourne_gauche",
@@ -143,12 +179,16 @@ function create() {
 /***********************************************************************/
 
 function update() {
+  // Mise à jour de la position des textures pour l'effet parallaxe
+  const camX = this.cameras.main.scrollX;
+  fond1.tilePositionX = camX * 0.4;  // Premier plan d'arrière-plan (plus rapide)
+  fond2.tilePositionX = camX * 0.2;
   if (clavier.right.isDown) {
-    player.setVelocityX(250);
+    player.setVelocityX(275);
     player.anims.play('anim_tourne_droite', true); 
   } 
   else if (clavier.left.isDown) {
-    player.setVelocityX(-250);
+    player.setVelocityX(-275);
     player.anims.play('anim_tourne_gauche', true); 
   } else {
     player.setVelocityX(0);
@@ -157,8 +197,4 @@ function update() {
   if ((clavier.up.isDown || clavier.space.isDown) && player.body.blocked.down) {
     player.setVelocityY(-450);
   }
-  if ((clavier.down.isDown)) {
-    action = true;
-  }
 }
-
