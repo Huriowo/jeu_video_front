@@ -15,6 +15,7 @@ class Niveau1 extends Phaser.Scene {
   preload() {
     this.load.image('tiles', 'src/assets/tileset.png');
     this.load.image('img_ciel', 'src/assets/sky.png'); 
+    this.load.image('img_ciel2', 'src/assets/sky2.png'); 
     this.load.image('img_fond1', 'src/assets/fond_layer1.png');
     this.load.image('img_fond2', 'src/assets/fond_layer2.png');
     this.load.image('img_soleil', 'src/assets/Sun.png');
@@ -208,20 +209,9 @@ class Niveau2 extends Phaser.Scene {
   create() {
     this.enTransition = false;
 
-    // 1. Fonds Parallaxe
-    this.sun = this.add.tileSprite(0, 0, 200, 200, 'img_soleil');
-    this.ciel = this.add.tileSprite(0, 0, 1920, 1080, 'img_ciel')
+    // 1. Fond fixe (uniquement le ciel, sans images de scrolling)
+    this.ciel = this.add.tileSprite(0, 0, 1920, 1080, 'img_ciel2')
       .setOrigin(0, 0)
-      .setScrollFactor(0);
-
-    const hauteurFond1 = this.textures.get('img_fond1').getSourceImage().height;
-    const hauteurFond2 = this.textures.get('img_fond2').getSourceImage().height;
-
-    this.fond2 = this.add.tileSprite(0, 800, 1920, hauteurFond2, 'img_fond2')
-      .setOrigin(0, 1)
-      .setScrollFactor(0);
-    this.fond1 = this.add.tileSprite(0, 1080, 1920, hauteurFond1, 'img_fond1')
-      .setOrigin(0, 1)
       .setScrollFactor(0);
 
     // 2. Tilemap Niveau 2 (2400 x 1600 px)
@@ -270,11 +260,6 @@ class Niveau2 extends Phaser.Scene {
 
   update() {
     if (this.enTransition) return;
-
-    // Parallaxe
-    const camX = this.cameras.main.scrollX;
-    this.fond1.tilePositionX = camX * 0.4;
-    this.fond2.tilePositionX = camX * 0.2;
 
     // Contrôles
     if (this.clavier.right.isDown) {

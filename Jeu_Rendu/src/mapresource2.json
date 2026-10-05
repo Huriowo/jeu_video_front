@@ -50,6 +50,32 @@
                  "width":0,
                  "x":201,
                  "y":1316
+                }, 
+                {
+                 "height":0,
+                 "id":3,
+                 "name":"botte1",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":1121.33333333333,
+                 "y":1243.33333333333
+                }, 
+                {
+                 "height":0,
+                 "id":5,
+                 "name":"porte2",
+                 "opacity":1,
+                 "point":true,
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":0,
+                 "x":193.939393939394,
+                 "y":515.151515151515
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -120,7 +146,7 @@
          "y":0
         }],
  "nextlayerid":5,
- "nextobjectid":3,
+ "nextobjectid":6,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.0",
