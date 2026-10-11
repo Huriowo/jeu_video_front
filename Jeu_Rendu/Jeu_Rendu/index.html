@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <title>Mon premier jeu en Phaser 3</title>
+    <meta charset="UTF-8" />
+    <style>
+      /* Le canvas est centré et occupe toute la fenêtre (voir "scale" dans main.js) */
+      body { margin: 0; background: #000; }
+    </style>
+    <!-- Phaser 3 avec le moteur physique Arcade -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+  </head>
+
+  <body>
+    <!-- Un fichier par scène (tuto "Créer un jeu multi-niveaux").
+         main.js doit rester le DERNIER : c'est lui qui référence les scènes dans la config. -->
+    <script src="src/audio.js"></script>
+    <script src="src/scenes/Preload.js"></script>
+    <script src="src/scenes/Menu.js"></script>
+    <script src="src/scenes/NiveauBase.js"></script>
+    <script src="src/scenes/Niveau1.js"></script>
+    <script src="src/scenes/Niveau2.js"></script>
+    <script src="src/scenes/Victoire.js"></script>
+    <script src="src/main.js"></script>
+  </body>
+</html>
